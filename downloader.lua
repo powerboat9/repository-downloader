@@ -16,4 +16,21 @@ function getFileDownloadURLs(url, gatheredFiles, gatheredDirectories)
     local directories = gatheredDirectories or {}
     for v in ipairs(jsonTable) do
         if v.type == "file" then
-            files
+            files[#files + 1] = {url = v.download_url, path = v.path}
+        elseif v.type == "dir" then
+            directories[#directories + 1] = v.url
+        end
+    end
+    local recursiveURL = directories[1]
+    directories = table.remove(directories, 1)
+    if #directories > 0 then
+        return getFileDownloadURLs(recursiveURL, files, directories)
+    end
+    return files
+end
+
+for v in ipairs(getFileDownloadURLs(URL)) do
+    local writeFile = fs.open(repository .. "/" .. v.path)
+    writeFile.write(http.get(v.url))
+    writeFile.close()
+end
