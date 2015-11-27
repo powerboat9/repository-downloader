@@ -3,6 +3,7 @@ local user = tArgs[1]
 local repository = tArgs[2]
 local gitPath = tArgs[3] --"/folder/folder/file"
 local URL = "http://api.github.com/repos/" .. user .. "/" .. repository .. "/contents" .. gitPath .. "/"
+local removeLuaExtention = tArgs[4] or true
 
 function getFileDownloadURLs(url, gatheredFiles, gatheredDirectories)
     assert(url, "url invalid")
@@ -30,6 +31,9 @@ function getFileDownloadURLs(url, gatheredFiles, gatheredDirectories)
 end
 
 for v in ipairs(getFileDownloadURLs(URL)) do
+    if (v.path:sub(#v.path - 3) == ".lua") and removeLuaExtention then
+        v.path = v.path:sub(1, #v.path - 4)
+    end
     local writeFile = fs.open(repository .. "/" .. v.path)
     writeFile.write(http.get(v.url))
     writeFile.close()
