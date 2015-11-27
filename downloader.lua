@@ -7,6 +7,7 @@ local removeLuaExtention = tArgs[4] or true
 
 function getFileDownloadURLs(url, gatheredFiles, gatheredDirectories)
     assert(url, "url invalid")
+    print("Downloading " .. url)
     local handle = http.get(url)
     assert(handle.readAll(), "Reading failed for url " .. url)
     local json = handle.readAll()
@@ -36,7 +37,10 @@ for v in ipairs(getFileDownloadURLs(URL)) do
     if (v.path:sub(#v.path - 3) == ".lua") and removeLuaExtention then
         v.path = v.path:sub(1, #v.path - 4)
     end
+    print("Saving " .. v.url .. " as " .. repository .. "/" .. v.path)
     local writeFile = fs.open(repository .. "/" .. v.path)
+    local webHandle = assert(http.get(v.url), "Getting " .. v.url .. " failed")
+    local webContents = assert(webHandle.readAll(), "Reading " .. v.url .. " failed")
     writeFile.write(http.get(v.url))
     writeFile.close()
 end
