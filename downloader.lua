@@ -8,7 +8,7 @@ local removeLuaExtention = tArgs[4] or true
 function getFileDownloadURLs(url, gatheredFiles, gatheredDirectories)
     assert(url, "url invalid")
     print("Downloading " .. url)
-    local handle = http.get(url)
+    local handle = assert(http.get(url), "Getting " .. url .. " failed")
     assert(handle.readAll(), "Reading failed for url " .. url)
     local json = handle.readAll()
     assert(json, "http.get failed to get " .. url)
