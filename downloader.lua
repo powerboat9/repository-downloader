@@ -7,7 +7,9 @@ local removeLuaExtention = tArgs[4] or true
 
 function getFileDownloadURLs(url, gatheredFiles, gatheredDirectories)
     assert(url, "url invalid")
-    local json = http.get(url).readAll()
+    local handle = http.get(url)
+    assert(handle.readAll(), "Reading failed for url " .. url)
+    local json = handle.readAll()
     assert(json, "http.get failed to get " .. url)
     json = json:gsub("%s*\n%s*", "") --removes white space around '\n' and '\n'
     json = json:gsub("\"(.-)\"%s*:%s*", "%1 : ") --turns '"hi": ' into 'hi = '
