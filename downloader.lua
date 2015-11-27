@@ -1,8 +1,8 @@
 local tArgs = {...}
 local user = tArgs[1]
 local repository = tArgs[2]
-local gitPath = tArgs[3] --"/folder/folder/file"
-local URL = "http://api.github.com/repos/" .. user .. "/" .. repository .. "/contents" .. gitPath .. "/"
+local gitPath = tArgs[3] --"/folder/folder/file/" or "/" for root
+local URL = "http://api.github.com/repos/" .. user .. "/" .. repository .. "/contents" .. gitPath
 local removeLuaExtention = tArgs[4] or true
 
 function getFileDownloadURLs(url, gatheredFiles, gatheredDirectories)
