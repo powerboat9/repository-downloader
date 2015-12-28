@@ -14,6 +14,7 @@ function getFileDownloadURLs(url, gatheredFiles, gatheredDirectories)
     json = json:gsub("%s*\n%s*", "") --removes white space around '\n' and '\n'
     json = json:gsub("\"([^\"]*)\"%s*:%s*", "%1 = ") --turns '"hi": ' into 'hi = '
     json = json:sub(2, #json - 1) --removes brackets around the almostJSON
+    json = "{" .. json .. "}" --adds curly brackets
     local jsonTable = assert(textutils.unserialize(json), "Failed to unserialize:\n" .. json)
     local files = gatheredUrls or {}
     local directories = gatheredDirectories or {}
