@@ -19,6 +19,7 @@ function getFileDownloadURLs(url, gatheredFiles, gatheredDirectories)
     local files = gatheredFiles or {}
     local directories = gatheredDirectories or {}
     for v in ipairs(jsonTable) do
+        print(v) --REMOVE WHEN WORKS
         if v.type == "file" then
             files[#files + 1] = {url = v.download_url, path = v.path}
         elseif v.type == "dir" then
