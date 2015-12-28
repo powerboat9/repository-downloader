@@ -16,7 +16,7 @@ function getFileDownloadURLs(url, gatheredFiles, gatheredDirectories)
     json = json:sub(2, #json - 1) --removes brackets around the almostJSON
     json = "{" .. json .. "}" --adds curly brackets
     local jsonTable = assert(textutils.unserialize(json), "Failed to unserialize:\n" .. json)
-    local files = gatheredUrls or {}
+    local files = gatheredFiles or {}
     local directories = gatheredDirectories or {}
     for v in ipairs(jsonTable) do
         if v.type == "file" then
