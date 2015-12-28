@@ -10,9 +10,7 @@ function getFileDownloadURLs(url, gatheredFiles, gatheredDirectories)
     assert(url, "url invalid")
     print("Downloading " .. url)
     local handle = assert(http.get(url), "Getting " .. url .. " failed")
-    assert(handle.readAll(), "Reading failed for url " .. url)
-    local json = handle.readAll()
-    assert(json, "http.get failed to get " .. url)
+    local json = assert(handle.readAll(), "Reading failed for url " .. url)
     json = json:gsub("%s*\n%s*", "") --removes white space around '\n' and '\n'
     json = json:gsub("\"(.-)\"%s*:%s*", "%1 : ") --turns '"hi": ' into 'hi = '
     json = json:sub(2, #json - 1) --removes brackets around the almostJSON
