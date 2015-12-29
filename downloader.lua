@@ -34,6 +34,7 @@ function getFileDownloadURLs(url, gatheredFiles, gatheredDirectories)
 end
 
 for v in ipairs(getFileDownloadURLs(URL)) do
+    print(v.path) --REMOVE WHEN WORKS
     if (v.path:sub(#v.path - 3) == ".lua") and removeLuaExtention then
         v.path = v.path:sub(1, #v.path - 4)
     end
