@@ -26,8 +26,8 @@ function getFileDownloadURLs(url, gatheredFiles, gatheredDirectories)
         end
     end
     local recursiveURL = directories[1]
-    table.remove(directories, 1)
-    if #directories > 0 then
+    if recursiveURL then
+        table.remove(directories, 1)
         return getFileDownloadURLs(recursiveURL, files, directories)
     end
     return files
