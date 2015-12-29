@@ -43,6 +43,6 @@ for k, v in ipairs(getFileDownloadURLs(URL)) do
     local writeFile = fs.open(repository .. "/" .. v.path, "w")
     local webHandle = assert(http.get(v.url), "Getting " .. v.url .. " failed")
     local webContents = assert(webHandle.readAll(), "Reading " .. v.url .. " failed")
-    writeFile.write(http.get(v.url))
+    writeFile.write(webContents)
     writeFile.close()
 end
