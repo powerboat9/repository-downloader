@@ -26,11 +26,13 @@ function getFileDownloadURLs(url, gatheredFiles, gatheredDirectories)
         end
     end
     local recursiveURL = directories[1]
+    if not recursiveURL then
+        return files
+    end
     if recursiveURL then
         table.remove(directories, 1)
         return getFileDownloadURLs(recursiveURL, files, directories)
     end
-    return files
 end
 
 for k, v in ipairs(getFileDownloadURLs(URL)) do
