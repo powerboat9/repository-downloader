@@ -40,7 +40,7 @@ for k, v in ipairs(getFileDownloadURLs(URL)) do
         v.path = v.path:sub(1, #v.path - 4)
     end
     print("Saving " .. v.url .. " as " .. repository .. "/" .. v.path)
-    local writeFile = fs.open(repository .. "/" .. v.path)
+    local writeFile = fs.open(repository .. "/" .. v.path, "w")
     local webHandle = assert(http.get(v.url), "Getting " .. v.url .. " failed")
     local webContents = assert(webHandle.readAll(), "Reading " .. v.url .. " failed")
     writeFile.write(http.get(v.url))
