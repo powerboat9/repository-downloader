@@ -18,8 +18,7 @@ function getFileDownloadURLs(url, gatheredFiles, gatheredDirectories)
     local jsonTable = assert(textutils.unserialize(json), "Failed to unserialize:\n" .. json)
     local files = gatheredFiles or {}
     local directories = gatheredDirectories or {}
-    for v in ipairs(jsonTable) do
-        print(v) --REMOVE WHEN WORKS
+    for k, v in ipairs(jsonTable) do
         if v.type == "file" then
             files[#files + 1] = {url = v.download_url, path = v.path}
         elseif v.type == "dir" then
