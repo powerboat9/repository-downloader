@@ -82,33 +82,48 @@ function getPath(s)
 end
 
 function getFilesInDir(json)
-    json = json:gsub("%s*\n%s*", "") --removes '\n' and the whitespace around it
-    json = json:gsub("\"([^\"]*)\"%s*:%s*", "%1 = ") --turns '"hi": ' into 'hi = '
-    json = json:sub(2, -2) --removes brackets around the almostJSON
-    json = "{" .. json .. "}" --adds curly brackets
-    local data = assert(textutils.unserialize(json), "Failed to unserialize:\n" .. json)
-    local searchDirs, files = {}, {}
-    for k, v in ipairs(data) do
-        
+    if type(json) == "string" then
+        json = json:gsub("%s*\n%s*", "") --removes '\n' and the whitespace around it
+        json = json:gsub("\"([^\"]*)\"%s*:%s*", "%1 = ") --turns '"hi": ' into 'hi = '
+        json = json:sub(2, -2) --removes brackets around the almostJSON
+        json = "{" .. json .. "}" --adds curly brackets
+        json = assert(textutils.unserialize(json), "Failed to unserialize:\n" .. json)
+    else
+        error("Invalid type for JSON input", 2)
+    end
+    local searchDirs, files, symlinks = {}, {}
+    for k, v in ipairs(json) do
         local getName = function(p) --Gets the name from a path
             local namePos = {p:find("[^/]*$")}
             return p:sub(namePos[1], namePos[2])
         end
-        
         if v.type == "file" then
-            fillPath()
-            --returnData.files[#returnData.files + 1] = {url = v.download_url, path = v.path, name = v.name}
+            files[#files + 1] = {url = v.download_url, path = v.path, name = v.name}
         elseif v.type == "dir" then
             searchDirs[#searchDirs + 1] = {url = v.url, path = v.path, name = v.name}
         elseif v.type == "symlink" then
-            local name = getName
-            searchDirs[#searchDirs + 1] = {path = v.target, name = name}
+            symlinks[#searchDirs + 1] = {path = v.target, name = getName(v.target)}
+        end
+    end
 end
 
 downloading = {}
 function download(url)
     http.request(url)
     downloading[#downloading + 1] = url
+end
+
+function downloadMulti(...)
+    local data = {}
+    local args = {...}
+    for _, v in args do
+        download(v)
+        data[v] = false
+    end
+    while true do
+        e, url, handle = os.pullEvent()
+        if ((e == "http_success") or (e == "http_failure)) and (data[url] == false) then
+            
 end
 
 function getFileDownloadURLs(url, gatheredFiles, gatheredDirectories)
@@ -136,6 +151,9 @@ function getFileDownloadURLs(url, gatheredFiles, gatheredDirectories)
     end
 end
 
+while true do
+    download()
+
 for k, v in ipairs(getFileDownloadURLs(URL)) do
     if (v.path:sub(#v.path - 3) == ".lua") and removeLuaExtention then
         v.path = v.path:sub(1, #v.path - 4)
@@ -147,6 +165,3 @@ for k, v in ipairs(getFileDownloadURLs(URL)) do
     writeFile.write(webContents)
     writeFile.close()
 end
-
-while true do
-    
