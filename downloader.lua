@@ -1,10 +1,85 @@
 local tArgs = {...}
-local user = tArgs[1]
-local repository = tArgs[2]
-local gitPath = tArgs[3] or "/"--"/folder/folder/file" or "/" for root
-local branch = tArgs[5] or nil
+
+function printUsage()
+    print("Usage: [options] user repository\n\n    -b: specifies a branch other than the default\n\n    -p: the path the files are downloaded to, defaults to the name of the repository\n\n    -g: the path files are downloaded from in the repository\n\n    -v: makes the program verbose\n\n    -q: make the program silent, can't be present with option -v\n\n    -l: removes the .lua extension from files")
+end
+
+function equals(v, ...)
+    local args = {...}
+    for _, compare in ipairs(args) do
+        if v == compare then
+            return true
+        end
+    end
+    return false
+end
+
+local wrongParam = function(p, tier)
+    tier = (tier and (tier > 0) and tier) or 1
+    error("Invalid Options, Did Not Use \"" .. p .. "\" Correctly", tier + 1)
+end
+
+local user = ""
+local repository = ""
+local gitPath = ""
+local branch = ""
+local myPath = "" --The path files are moved to
+local removeLuaExtention = false
+
+local mode = 0 --0 is normal, 1 is verbose, 2 is silent
+
+local done = {}
+
+local nextParam = ""
+for k, v in ipairs(tArgs) do
+    if equals(v, "-b", "-p", "-g") then --"-v", "-q", "-l"
+        if nextParam ~= "" then
+            wrongParam(nextParam, 2)
+        end
+        nextParam = v
+        done[v:sub(2, -1)] = true
+    elseif v == "-v" then
+        if done.vOrQ then wrongParam(v, 2) end
+        done.vOrQ = true
+        mode = 1
+    elseif v == "-q" then
+        if done.vOrQ then wrongParam(v, 2) end
+        done.vOrQ = true
+        mode = 2
+    elseif v == "-l" then
+        if done.l then wrongParam(v, 2) end
+        done.l = true
+        removeLuaExtension = true
+    elseif nextParam ~= "" then
+        if nextParam == "-b" then
+            branch = v
+        elseif nextParam == "-p" then
+            myPath = v
+        elseif nextParam == "-g" then
+            gitPath = v
+        end
+        nextParam = ""
+    else
+        user = v
+        repository = tArgs[k + 1]
+        break
+    end
+end
+
+if not (user and repository) then
+    error("Invalid User or Repository", 2)
+end
+
+myPath = myPath or ("/" .. repository)
 local URL = "https://api.github.com/repos/" .. user .. "/" .. repository .. "/contents" .. gitPath .. (branch and "?ref=" or "") .. (branch or "")
-local removeLuaExtention = tArgs[4] or true
+
+function getPath(s)
+    local returnPath = {}
+    for name in s:gfind("([^/]*)/") do
+        returnPath[#path + 1] = name
+    end
+    return returnPath
+end
 
 function getFilesInDir(json)
     json = json:gsub("%s*\n%s*", "") --removes '\n' and the whitespace around it
@@ -12,21 +87,22 @@ function getFilesInDir(json)
     json = json:sub(2, -2) --removes brackets around the almostJSON
     json = "{" .. json .. "}" --adds curly brackets
     local data = assert(textutils.unserialize(json), "Failed to unserialize:\n" .. json)
-    local returnData = {}
+    local searchDirs, files = {}, {}
     for k, v in ipairs(data) do
-        local getPath = function(s)
-            local path = {}
-            for name in s:gfind("([^/]*)/") do
-                path[#path + 1] = name
-            end
-            return path
+        
+        local getName = function(p) --Gets the name from a path
+            local namePos = {p:find("[^/]*$")}
+            return p:sub(namePos[1], namePos[2])
         end
+        
         if v.type == "file" then
-            
+            fillPath()
             --returnData.files[#returnData.files + 1] = {url = v.download_url, path = v.path, name = v.name}
         elseif v.type == "dir" then
-            returnData.dir[#returnData.dir + 1] = {url = v.url, path = v.path, name = v.name}
-            elseif v.type == "s
+            searchDirs[#searchDirs + 1] = {url = v.url, path = v.path, name = v.name}
+        elseif v.type == "symlink" then
+            local name = getName
+            searchDirs[#searchDirs + 1] = {path = v.target, name = name}
 end
 
 downloading = {}
@@ -73,3 +149,4 @@ for k, v in ipairs(getFileDownloadURLs(URL)) do
 end
 
 while true do
+    
