@@ -6,6 +6,9 @@ local branch = tArgs[5] or nil
 local URL = "https://api.github.com/repos/" .. user .. "/" .. repository .. "/contents" .. gitPath .. (branch and "?ref=" or "") .. (branch or "")
 local removeLuaExtention = tArgs[4] or true
 
+downloading = {}
+function download
+
 function getFileDownloadURLs(url, gatheredFiles, gatheredDirectories)
     assert(url, "url invalid")
     print("Downloading " .. url)
