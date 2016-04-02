@@ -6,19 +6,41 @@ local branch = tArgs[5] or nil
 local URL = "https://api.github.com/repos/" .. user .. "/" .. repository .. "/contents" .. gitPath .. (branch and "?ref=" or "") .. (branch or "")
 local removeLuaExtention = tArgs[4] or true
 
+function getFilesInDir(json)
+    json = json:gsub("%s*\n%s*", "") --removes '\n' and the whitespace around it
+    json = json:gsub("\"([^\"]*)\"%s*:%s*", "%1 = ") --turns '"hi": ' into 'hi = '
+    json = json:sub(2, -2) --removes brackets around the almostJSON
+    json = "{" .. json .. "}" --adds curly brackets
+    local data = assert(textutils.unserialize(json), "Failed to unserialize:\n" .. json)
+    local returnData = {}
+    for k, v in ipairs(data) do
+        local getPath = function(s)
+            local path = {}
+            for name in s:gfind("([^/]*)/") do
+                path[#path + 1] = name
+            end
+            return path
+        end
+        if v.type == "file" then
+            
+            --returnData.files[#returnData.files + 1] = {url = v.download_url, path = v.path, name = v.name}
+        elseif v.type == "dir" then
+            returnData.dir[#returnData.dir + 1] = {url = v.url, path = v.path, name = v.name}
+            elseif v.type == "s
+end
+
 downloading = {}
-function download
+function download(url)
+    http.request(url)
+    downloading[#downloading + 1] = url
+end
 
 function getFileDownloadURLs(url, gatheredFiles, gatheredDirectories)
     assert(url, "url invalid")
     print("Downloading " .. url)
     local handle = assert(http.get(url), "Getting " .. url .. " failed")
     local json = assert(handle.readAll(), "Reading failed for url " .. url)
-    json = json:gsub("%s*\n%s*", "") --removes white space around '\n' and '\n'
-    json = json:gsub("\"([^\"]*)\"%s*:%s*", "%1 = ") --turns '"hi": ' into 'hi = '
-    json = json:sub(2, #json - 1) --removes brackets around the almostJSON
-    json = "{" .. json .. "}" --adds curly brackets
-    local jsonTable = assert(textutils.unserialize(json), "Failed to unserialize:\n" .. json)
+    local jsonTable = getFilesInDir(json)
     local files = gatheredFiles or {}
     local directories = gatheredDirectories or {}
     for k, v in ipairs(jsonTable) do
@@ -49,3 +71,5 @@ for k, v in ipairs(getFileDownloadURLs(URL)) do
     writeFile.write(webContents)
     writeFile.close()
 end
+
+while true do
