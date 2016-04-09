@@ -87,7 +87,7 @@ function getPath(s)
     return returnPath
 end
 
-function getFilesInDir(json)
+function parseJson(json)
     if type(json) == "string" then
         json = json:gsub("%s*\n%s*", "") --removes '\n' and the whitespace around it
         json = json:gsub("\"([^\"]*)\"%s*:%s*", "%1 = ") --turns '"hi": ' into 'hi = '
@@ -97,6 +97,10 @@ function getFilesInDir(json)
     else
         error("Invalid type for JSON input", 2)
     end
+    return json
+end
+
+function getFilesInDir(json)
     local searchDirs, files, symlinks = {}, {}
     for k, v in ipairs(json) do
         local getName = function(p) --Gets the name from a path
