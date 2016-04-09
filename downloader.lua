@@ -28,6 +28,12 @@ local removeLuaExtention = false
 
 local mode = 0 --0 is normal, 1 is verbose, 2 is silent
 
+function safePrint(debug, ...)
+    if (mode == 1) or ((not debug) and (not (mode == 2))) then
+        print(table.unpack(arg))
+    end
+end
+
 local done = {}
 
 local nextParam = ""
@@ -102,9 +108,10 @@ function getFilesInDir(json)
         elseif v.type == "dir" then
             searchDirs[#searchDirs + 1] = {url = v.url, path = v.path, name = v.name}
         elseif v.type == "symlink" then
-            symlinks[#searchDirs + 1] = {path = v.target, name = getName(v.target)}
+            symlinks[#symlinks + 1] = {path = v.target, name = getName(v.target)}
         end
     end
+    return files, searchDirs, symlinks
 end
 
 downloading = {}
@@ -115,15 +122,24 @@ end
 
 function downloadMulti(...)
     local data = {}
+    local downloaded = {}
     local args = {...}
     for _, v in args do
         download(v)
-        data[v] = false
+        downloaded[v] = false
     end
     while true do
         e, url, handle = os.pullEvent()
-        if ((e == "http_success") or (e == "http_failure)) and (data[url] == false) then
-            
+        if ((e == "http_success") or (e == "http_failure)) and (downloaded[url] == false) then
+            if e == "http_success" then
+                data[url] = handle.readAll()
+                handle.close()
+            elseif e == "http_failure" then
+                printError("Error: Could not download " .. url)
+            end
+        end
+    end
+    return data
 end
 
 function getFileDownloadURLs(url, gatheredFiles, gatheredDirectories)
@@ -151,6 +167,7 @@ function getFileDownloadURLs(url, gatheredFiles, gatheredDirectories)
     end
 end
 
+urls = {}
 while true do
     download()
 
