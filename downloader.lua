@@ -167,9 +167,30 @@ function getFileDownloadURLs(url, gatheredFiles, gatheredDirectories)
     end
 end
 
-urls = {}
-while true do
-    download()
+local files = {}
+local directories = {URL}
+local symlinks = {}
+while directories[1] or symlinks[1] do
+    if symlinks[1] then
+    if directories[1] then
+        local data = downloadMulti(table.unpack(directories))
+        for downUrl, downData in pairs(data) do
+            local downList = {getFilesInDir(downData)}
+            for _, v in ipairs(downList[1]) do
+                files[#files + 1] = v
+            end
+            for _, v in ipairs(downList[2]) do
+                directories[#directories + 1] = v
+            end
+            for _, v in ipairs(downList[3]) do
+                symlinks[#symlinks + 1]
+            end
+        end
+    end
+end
+        
+    
+    
 
 for k, v in ipairs(getFileDownloadURLs(URL)) do
     if (v.path:sub(#v.path - 3) == ".lua") and removeLuaExtention then
