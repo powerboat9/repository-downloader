@@ -77,7 +77,10 @@ if not (user and repository) then
 end
 
 myPath = myPath or ("/" .. repository)
-local URL = "https://api.github.com/repos/" .. user .. "/" .. repository .. "/contents" .. gitPath .. (branch and "?ref=" or "") .. (branch or "")
+
+function getGit(user, repository, repositoryPath, branch)
+    return ("https://api.github.com/repos/%s/%s/contents%s%s)):format(user, repository, (repositoryPath or "/"), ((branch and "?ref=") or "") .. (branch or ""))
+end
 
 function getPath(s)
     local returnPath = {}
@@ -100,28 +103,22 @@ function parseJson(json)
     return json
 end
 
-function getFilesInDir(json)
-    local searchDirs, files, symlinks = {}, {}
+function getFilesInDir(json, mainDirPath) --mainDirPath ends in "/"
+    local searchDirs, files = {}, {}
     for k, v in ipairs(json) do
         local getName = function(p) --Gets the name from a path
             local namePos = {p:find("[^/]*$")}
             return p:sub(namePos[1], namePos[2])
         end
         if v.type == "file" then
-            files[#files + 1] = {url = v.download_url, path = v.path, name = v.name}
+            files[#files + 1] = {url = v.download_url, path = v.path, name = v.name, save = mainDirPath .. v.name .. "/"}
         elseif v.type == "dir" then
-            searchDirs[#searchDirs + 1] = {url = v.url, path = v.path, name = v.name}
+            searchDirs[#searchDirs + 1] = {url = v.url, path = v.path, name = v.name, save = mainDirPath .. v.name .. "/"}
         elseif v.type == "symlink" then
-            symlinks[#symlinks + 1] = {path = v.target, name = getName(v.target)}
+            searchDirs[#searchDirs + 1] = {url = mainDirPath .. (v.target):sub(2, -1), path = v.target, name = getName(v.target), save = mainDirPath .. v.name .. "/"}
         end
     end
-    return files, searchDirs, symlinks
-end
-
-downloading = {}
-function download(url)
-    http.request(url)
-    downloading[#downloading + 1] = url
+    return files, searchDirs
 end
 
 function downloadMulti(...)
@@ -129,7 +126,7 @@ function downloadMulti(...)
     local downloaded = {}
     local args = {...}
     for _, v in args do
-        download(v)
+        http.request(v)
         downloaded[v] = false
     end
     while true do
@@ -172,12 +169,13 @@ function getFileDownloadURLs(url, gatheredFiles, gatheredDirectories)
 end
 
 local files = {}
-local directories = {URL}
+local directories = {{url = getGit(user, repository, gitPath, branch), path = ((gitPath:sub(1, 1) == "/") and gitPath:sub(2, -1)) or gitPath, name = getPath(gitPath), save = "
 local symlinks = {}
 while directories[1] or symlinks[1] do
     if symlinks[1] then
     if directories[1] then
-        local data = downloadMulti(table.unpack(directories))
+        local dirUrls, dirNames = {}
+        local data = downloadMulti(
         for downUrl, downData in pairs(data) do
             local downList = {getFilesInDir(downData)}
             for _, v in ipairs(downList[1]) do
@@ -185,9 +183,6 @@ while directories[1] or symlinks[1] do
             end
             for _, v in ipairs(downList[2]) do
                 directories[#directories + 1] = v
-            end
-            for _, v in ipairs(downList[3]) do
-                symlinks[#symlinks + 1]
             end
         end
     end
