@@ -131,7 +131,7 @@ function downloadMulti(...)
     end
     while true do
         e, url, handle = os.pullEvent()
-        if ((e == "http_success") or (e == "http_failure)) and (downloaded[url] == false) then
+        if ((e == "http_success") or (e == "http_failure")) and (downloaded[url] == false) then
             if e == "http_success" then
                 data[url] = handle.readAll()
                 handle.close()
