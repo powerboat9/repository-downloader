@@ -187,9 +187,22 @@ while directories[1] or symlinks[1] do
         end
     end
 end
-        
-    
-    
+
+local downloading = {}
+
+local save = coroutine.create(function()
+    while true do
+        local _, url, h = os.pullEvent("http_success")
+        if downloading[url] then
+            local file = fs.open(, "w")
+            file.write(h.readAll())
+            file.close()
+        end
+        h.close()
+    end
+end)
+
+local 
 
 for k, v in ipairs(getFileDownloadURLs(URL)) do
     if (v.path:sub(#v.path - 3) == ".lua") and removeLuaExtention then
