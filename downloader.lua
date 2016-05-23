@@ -17,4 +17,5 @@ local save = coroutine.create(function()
     while true do
         local _, url, h = os.pullEvent("http_success")
         if downloads[url] then
-            if downloads
+            if downloads.type == "file" then
+                
