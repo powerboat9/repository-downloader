@@ -5,6 +5,10 @@ local function getBaseURL(path)
     return baseURL = ("https://api.github.com/repos/%s/%s/contents/%s"):format(user, repo, path) .. (branch and ("?ref=" .. branch)) or ""
 end
 
+local function log(txt, ...)
+    local sep, isEscaped = {}, false
+    if 
+
 local function exit(crashed)
     local msg
     if crashed then
@@ -35,4 +39,5 @@ local fail = coroutine.create(function()
     while true do
         local _, url = os.pullEvent("http_failure")
         if downloads[url] then
-            
+            local dData = downloads[url]
+            log("Could not download %s", url)
