@@ -5,9 +5,9 @@ local function getBaseURL(path)
     return baseURL = ("https://api.github.com/repos/%s/%s/contents/%s"):format(user, repo, path) .. (branch and ("?ref=" .. branch)) or ""
 end
 
-local function log(txt, ...)
-    local sep, isEscaped = {}, false
-    if 
+local function getTime()
+    return os.time() + os.day() * 24000
+end
 
 local function exit(crashed)
     local msg
@@ -22,22 +22,31 @@ local function download(path, type)
     http.request(downURL)
 end
 
-local save = coroutine.create(function()
-    while true do
-        local _, url, h = os.pullEvent("http_success")
-        if downloads[url] and (downloads[url].type == "file") then
-            local file = fs.open(downloads[url].path, "w")
-            file.write(h.readAll())
-            file.close()
-        end
-        h.close()
+local function save(url, h)
+    if downloads[url] and (downloads[url].type == "file") then
+        local file = fs.open(downloads[url].path, "w")
+        file.write(h.readAll())
+        file.close()
     end
+    h.close()
 end
 
-local retry = {}
-local fail = coroutine.create(function()
+local function fail()
+    url = coroutine.yield()
+    if downloads[url] then
+        local old = term.getBackgroundColor()
+        term.write("Downloading \"")
+        local new
+        if term.isColor() then new = colors.blue else new = colors.grey end
+        term.setTextColor(new)
+        term.write(url)
+        term.setBackgroundColor(old)
+        term.write("\" failed")
+        return true
+    end
+    return false
+end
+
+local explore = coroutine.create(function()
     while true do
-        local _, url = os.pullEvent("http_failure")
-        if downloads[url] then
-            local dData = downloads[url]
-            log("Could not download %s", url)
+        local _, url
