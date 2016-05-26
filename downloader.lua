@@ -46,7 +46,9 @@ local function filter(url, h)
         local data = h.readAll()
         data = data:gsub("\"([^\"]*)\"%s*:%s*", "%1 = "):gsub("[", "{"):gsub("]", "}")
         data = textutils.unserialize(data)
-        for _, element in ipairs(data) do
-            if element.type == "file" then
+        if data[1] then
+            for _, element in ipairs(data) do
+                if element.type == "file" then
+                    download(element.path, element.type
     h.close()
     
