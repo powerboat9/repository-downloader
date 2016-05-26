@@ -9,15 +9,10 @@ local function getTime()
     return os.time() + os.day() * 24000
 end
 
-local function exit(crashed)
-    local msg
-    if crashed then
-        printError(
-
 local downloads = {}
 local function download(path, type)
     local sPath = fs.combine(savePath, path)
-    local downURL = getURL(gPath)
+    local downURL = getBaseURL(path)
     downloads[downURL] = {type = type, path = sPath}
     http.request(downURL)
 end
@@ -31,8 +26,7 @@ local function save(url, h)
     h.close()
 end
 
-local function fail()
-    url = coroutine.yield()
+local function fail(url)
     if downloads[url] then
         local old = term.getBackgroundColor()
         term.write("Downloading \"")
@@ -47,6 +41,12 @@ local function fail()
     return false
 end
 
-local explore = coroutine.create(function()
-    while true do
-        local _, url
+local function filter(url, h)
+    if downloads[url] then
+        local data = h.readAll()
+        data = data:gsub("\"([^\"]*)\"%s*:%s*", "%1 = "):gsub("[", "{"):gsub("]", "}")
+        data = textutils.unserialize(data)
+        for _, element in ipairs(data) do
+            if element.type == "file" then
+    h.close()
+    
