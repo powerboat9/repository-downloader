@@ -10,10 +10,10 @@ local function getTime()
 end
 
 local downloads = {}
-local function download(path, type)
+local function download(url, path, type)
     local sPath = fs.combine(savePath, path)
-    local downURL = getBaseURL(path)
-    downloads[downURL] = {type = type, path = sPath}
+    local downURL = url
+    downloads[downURL] = {type =path = sPath}
     http.request(downURL)
 end
 
