@@ -9,7 +9,10 @@ end
 verifyAlphaNumeric(user, "Invalid username")
 verifyAlphaNumeric(repo, "Invalid repository")
 
-savePath = type(savePath) == "string" and savePath or "/.APIS/" .. repo
+savePath = type(savePath) == "string" and savePath
+local toRecord = savePath ? true : false --To turn a value into a boolean
+savePath = savePath or "/.APIS/" .. repo
+
 gitPath = type(gitPath) == "string" and gitPath or ""
 branch = type(branch) == "string" and branch or nil
 next = type(next) == "table" and next or {}
@@ -39,6 +42,10 @@ local function save(url, h)
     file.write(h.readAll())
     file.close()
     h.close()
+    file = fs.open(downloads[url].savePath, " r")
+    if file.readLine() == "[[/ PMETA HEADER \]]" then --discrete backlash ftw
+        local data = ""
+        for 
 end
 
 local function fail(url)
@@ -80,6 +87,11 @@ local function filter(url, h)
 end
 
 local function done()
+    if toRecord then
+        local f = fs.open(".api", "a")
+        f.write(user .. "/" .. repo .. ";")
+        f.close()
+    end
     if #next == 0 then
         print("Finished all downloads")
     else
