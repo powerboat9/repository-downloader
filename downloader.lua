@@ -10,15 +10,13 @@ local function getTime()
 end
 
 local downloads = {}
-local function download(url, path, type)
-    local sPath = fs.combine(savePath, path)
-    local downURL = url
-    downloads[downURL] = {type =path = sPath}
-    http.request(downURL)
+local function download(url, savePath, isAPICall)
+    downloads[url] = {
+    http.request(url)
 end
 
 local function save(url, h)
-    if downloads[url] and (downloads[url].type == "file") then
+    if downloads[url] and (not downloads[url].isAPICall) then
         local file = fs.open(downloads[url].path, "w")
         file.write(h.readAll())
         file.close()
@@ -31,7 +29,7 @@ local function fail(url)
         local old = term.getBackgroundColor()
         term.write("Downloading \"")
         local new
-        if term.isColor() then new = colors.blue else new = colors.grey end
+        if term.isColor() then new = colors.red else new = colors.grey end
         term.setTextColor(new)
         term.write(url)
         term.setBackgroundColor(old)
