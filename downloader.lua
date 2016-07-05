@@ -11,12 +11,12 @@ end
 
 local downloads = {}
 local function download(url, savePath, isAPICall)
-    downloads[url] = {
+    downloads[url] = {isAPICall = isAPICall, path = savePath}
     http.request(url)
 end
 
 local function save(url, h)
-    if downloads[url] and (not downloads[url].isAPICall) then
+    if downloads[url] then
         local file = fs.open(downloads[url].path, "w")
         file.write(h.readAll())
         file.close()
@@ -44,9 +44,8 @@ local function filter(url, h)
         local data = h.readAll()
         data = data:gsub("\"([^\"]*)\"%s*:%s*", "%1 = "):gsub("[", "{"):gsub("]", "}")
         data = textutils.unserialize(data)
-        if data[1] then
-            for _, element in ipairs(data) do
-                if element.type == "file" then
-                    download(element.path, element.type
+        for _, element in ipairs(data) do
+            if element.type == "file" then
+                download(element.path, element.type
     h.close()
     
