@@ -2,7 +2,12 @@ local user, repo, savePath, gitPath, branch = ...
 
 local function getBaseURL(path)
     path = fs.combine(gitPath, path)
-    return baseURL = ("https://api.github.com/repos/%s/%s/contents/%s"):format(user, repo, path) .. (branch and ("?ref=" .. branch)) or ""
+    if (path ~= "") and (path:sub(1, 1) ~= "/") then path = "/" .. path end
+    return baseURL = ("https://api.github.com/repos/%s/%s/contents%s"):format(user, repo, path) .. (branch and ("?ref=" .. branch)) or ""
+end
+
+local function getPathFromURL(url)
+    return url:sub(30):gsub("%?ref=.*$", ""):gsub("^[^/]*/[^/]*/contents/", "")
 end
 
 local function getTime()
@@ -11,7 +16,7 @@ end
 
 local downloads = {}
 local function download(url, savePath, isAPICall)
-    downloads[url] = {isAPICall = isAPICall, path = savePath}
+    downloads[url] = {isAPICall = isAPICall, savePath = savePath, gitURL = url}
     http.request(url)
 end
 
@@ -42,10 +47,13 @@ end
 local function filter(url, h)
     if downloads[url] then
         local data = h.readAll()
-        data = data:gsub("\"([^\"]*)\"%s*:%s*", "%1 = "):gsub("[", "{"):gsub("]", "}")
+        data = data:gsub("\"([^\"]*)\"%s*:%s*", "%1 = "):gsub("[", "{"):gsub("]", "}"):gsub("null", "nil")
         data = textutils.unserialize(data)
         for _, element in ipairs(data) do
             if element.type == "file" then
-                download(element.path, element.type
+                download(element.download_url, downloads[url].savePath .. "/" .. element.name, false)
+            elseif element.type == "dir" then
+                download(element.url, downloads[url].savePath .. "/" .. element.name, true)
+            elseif element.type == "
     h.close()
     
