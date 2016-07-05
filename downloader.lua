@@ -15,7 +15,7 @@ branch = type(branch) == "string" and branch or nil
 next = type(next) == "table" and next or {}
 
 local function getBaseURL(path)
-    path = fs.combine(gitPath, path)
+    --path = fs.combine(gitPath, path)
     if (path ~= "") and (path:sub(1, 1) ~= "/") then path = "/" .. path end
     return baseURL = ("https://api.github.com/repos/%s/%s/contents%s"):format(user, repo, path) .. (branch and ("?ref=" .. branch)) or ""
 end
@@ -35,11 +35,9 @@ local function download(url, savePath, isAPICall)
 end
 
 local function save(url, h)
-    if downloads[url] then
-        local file = fs.open(downloads[url].path, "w")
-        file.write(h.readAll())
-        file.close()
-    end
+    local file = fs.open(downloads[url].savePath, "w")
+    file.write(h.readAll())
+    file.close()
     h.close()
 end
 
@@ -79,4 +77,32 @@ local function filter(url, h)
         end
     end
     h.close()
+end
+
+local function done()
+    if #next == 0 then
+        print("Finished all downloads")
+    else
+        print("Finished download")
+    end
+end
+
+download(getBaseURL(gitPath), savePath, true)
+while true do
+    local e, url, h = os.pullEvent()
+    if downloads[url] then
+        if e == "http_success" then
+            if downloads[url].isAPICall then
+                filter(url, h)
+            else
+                save(url, h)
+            end
+        elseif e == "http_failure" then
+            fail(url)
+        end
+        if #downloads == 0 then
+            done()
+            break
+        end
+    end
 end
