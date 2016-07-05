@@ -1,4 +1,18 @@
-local user, repo, savePath, gitPath, branch = ...
+local user, repo, savePath, gitPath, branch, next = ...
+
+local function verifyAlphaNumeric(str, errorMSG)
+    if not (type(user) == "string") or not (user:gsub("[^%w_]+", "") == user) then
+        error(errorMSG, 0)
+    end
+end
+
+verifyAlphaNumeric(user, "Invalid username")
+verifyAlphaNumeric(repo, "Invalid repository")
+
+savePath = type(savePath) == "string" and savePath or "/.APIS/" .. repo
+gitPath = type(gitPath) == "string" and gitPath or ""
+branch = type(branch) == "string" and branch or nil
+next = type(next) == "table" and next or {}
 
 local function getBaseURL(path)
     path = fs.combine(gitPath, path)
@@ -54,6 +68,11 @@ local function filter(url, h)
                 download(element.download_url, downloads[url].savePath .. "/" .. element.name, false)
             elseif element.type == "dir" then
                 download(element.url, downloads[url].savePath .. "/" .. element.name, true)
-            elseif element.type == "
+            elseif element.type == "symlink" then
+                local f = fs.open(downloads[url].savePath .. "/" . element.name .. ".clnk", "w")
+                f.write(element.target:gsub("^/", ""))
+                f.close()
+            elseif element.type == "submodule" then
+                
     h.close()
     
