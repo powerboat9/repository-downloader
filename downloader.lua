@@ -59,20 +59,24 @@ local function fail(url)
 end
 
 local function filter(url, h)
-    if downloads[url] then
-        local data = h.readAll()
-        data = data:gsub("\"([^\"]*)\"%s*:%s*", "%1 = "):gsub("[", "{"):gsub("]", "}"):gsub("null", "nil")
-        data = textutils.unserialize(data)
-        for _, element in ipairs(data) do
-            if element.type == "file" then
-                download(element.download_url, downloads[url].savePath .. "/" .. element.name, false)
-            elseif element.type == "dir" then
-                download(element.url, downloads[url].savePath .. "/" .. element.name, true)
-            elseif element.type == "symlink" then
-                local f = fs.open(downloads[url].savePath .. "/" . element.name .. ".clnk", "w")
-                f.write(element.target:gsub("^/", ""))
-                f.close()
-            elseif element.type == "submodule" then
-                
+    local data = h.readAll()
+    data = data:gsub("\"([^\"]*)\"%s*:%s*", "%1 = "):gsub("[", "{"):gsub("]", "}"):gsub("null", "nil")
+    data = textutils.unserialize(data)
+    for _, element in ipairs(data) do
+        if element.type == "file" then
+            download(element.download_url, downloads[url].savePath .. "/" .. element.name, false)
+        elseif element.type == "dir" then
+            download(element.url, downloads[url].savePath .. "/" .. element.name, true)
+        elseif element.type == "symlink" then
+            local f = fs.open(downloads[url].savePath .. "/" . element.name .. ".clnk", "w")
+            f.write(element.target:gsub("^/", ""))
+            f.close()
+        elseif element.type == "submodule" then
+            local gitURL, ok = element.submodule_git_url:gsub("^git://github.com/", "")
+            ok = ok > 0
+            if not ok then error("Could not download " .. element.submodule_git_url, 0) end
+            next[#next + 1] = {gitURL:gsub("/[^/]*$", ""), gitURL:gsub("[^/]*/", ""), downloads[url].savePath .. "/" .. element.name}
+        end
+    end
     h.close()
-    
+end
