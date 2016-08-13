@@ -1,4 +1,9 @@
-local user, repo, savePath, gitPath, branch, next = ...
+local tArgs = ...
+local user, repo, savePath, gitPath, branch, next
+do
+    local pkgName = tArgs[1]
+    user, repo = "", ""
+    for i = 1, #pkgName do
 
 local function verifyAlphaNumeric(str, errorMSG)
     if not (type(user) == "string") or not (user:gsub("[^%w_]+", "") == user) then
@@ -63,10 +68,12 @@ local function fail(url)
     return false
 end
 
+local function unserializeJSON(str)
+    return textutils.unserialize(str:gsub("\"([^\"]*)\"%s*:%s*", "%1 = "):gsub("[", "{"):gsub("]", "}"):gsub("null", "nil"))
+end
+
 local function filter(url, h)
-    local data = h.readAll()
-    data = data:gsub("\"([^\"]*)\"%s*:%s*", "%1 = "):gsub("[", "{"):gsub("]", "}"):gsub("null", "nil")
-    data = textutils.unserialize(data)
+    local data = unserislizeJSON(h.readAll())
     for _, element in ipairs(data) do
         if element.type == "file" then
             download(element.download_url, downloads[url].savePath .. "/" .. element.name, false)
