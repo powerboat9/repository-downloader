@@ -1,9 +1,4 @@
-local tArgs = ...
-local user, repo, savePath, gitPath, branch, next
-do
-    local pkgName = tArgs[1]
-    user, repo = "", ""
-    for i = 1, #pkgName do
+local user, repo, savePath, gitPath, branch, next = ...
 
 local function verifyAlphaNumeric(str, errorMSG)
     if not (type(user) == "string") or not (user:gsub("[^%w_]+", "") == user) then
@@ -47,10 +42,6 @@ local function save(url, h)
     file.write(h.readAll())
     file.close()
     h.close()
-    file = fs.open(downloads[url].savePath, " r")
-    if file.readLine() == "[[/ PMETA HEADER \]]" then --discrete backlash ftw
-        local data = ""
-        for 
 end
 
 local function fail(url)
@@ -100,7 +91,7 @@ local function done()
         f.close()
     end
     if #next == 0 then
-        print("Finished all downloads")
+        print("Finished all downloads")r
     else
         print("Finished download")
     end
