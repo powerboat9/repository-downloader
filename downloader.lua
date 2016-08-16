@@ -44,19 +44,21 @@ local function save(url, h)
     h.close()
 end
 
-local function fail(url)
-    if downloads[url] then
-        local old = term.getBackgroundColor()
-        term.write("Downloading \"")
-        local new
-        if term.isColor() then new = colors.red else new = colors.grey end
+local function fail(url, savePath)
+    local old = term.getBackgroundColor()
+    term.write("Downloading \"")
+    local new
+    if term.isColor() then new = colors.red else new = colors.grey end
+    term.setTextColor(new)
+    term.write(url)
+    term.setTextColor(old)
+    if savePath then
+        term.write("\" to \"")
         term.setTextColor(new)
-        term.write(url)
-        term.setBackgroundColor(old)
-        term.write("\" failed")
-        return true
+        term.write(savePath)
+        term.setTextColor(old)
     end
-    return false
+    term.write("\" failed")
 end
 
 local function unserializeJSON(str)
@@ -77,8 +79,11 @@ local function filter(url, h)
         elseif element.type == "submodule" then
             local gitURL, ok = element.submodule_git_url:gsub("^git://github.com/", "")
             ok = ok > 0
-            if not ok then error("Could not download " .. element.submodule_git_url, 0) end
-            next[#next + 1] = {gitURL:gsub("/[^/]*$", ""), gitURL:gsub("[^/]*/", ""), downloads[url].savePath .. "/" .. element.name}
+            if not ok then
+                fail(element.submodule_git_url, downloads[url].savePath)
+            else
+                next[#next + 1] = {gitURL:gsub("/[^/]*$", ""), gitURL:gsub("[^/]*/", ""), downloads[url].savePath .. "/" .. element.name}
+            end
         end
     end
     h.close()
@@ -91,7 +96,7 @@ local function done()
         f.close()
     end
     if #next == 0 then
-        print("Finished all downloads")r
+        print("Finished all downloads")
     else
         print("Finished download")
     end
