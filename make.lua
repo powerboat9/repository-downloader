@@ -1,17 +1,4 @@
-local fName = ...
-
-fName = type(fName) == "string" and fs.exists(fName) and not fs.isDir(fName) and fName or error("Invalid file " .. tostring(fName))
-
-local data
-do
-    local file = fs.open(fName, "r")
-    data = file.read all()
-    file.close()
+local file = shell.dir() .. "/" .. "Makefile"
+if not fs.exists(file) or fs.isDir(file) then
+    error("Cannot find Make file", 0)
 end
-
-local includes = {}
-
-local line1 = data:gsub("^([^\n]*).*", "%1")
-data = data:gsub("^[^\n]*\n(.*)", "%1")
-
-if line1 == "
