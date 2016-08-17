@@ -4,7 +4,7 @@
 |:----:|:----:|
 |{}|Repeat 1 or more times|
 |[]|Optional|
-|**()**|User specified value|
+|()|User specified value|
 
 #Command Arguments
 
@@ -14,4 +14,4 @@ download build {package}
 
 # Package Format
 
-**user**/**repo**[:**branch**][@**gitPath**][>**savePath**]
+(**user**)/(**repo**)[:(**branch**)][@(**gitPath**)][>(**savePath**)]
