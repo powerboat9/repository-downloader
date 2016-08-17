@@ -1,4 +1,5 @@
-local user, repo, savePath, gitPath, branch, next = ...
+local tArgs = ...
+local user, repo, savePath, gitPath, branch = table.unpack(tArgs[1])
 
 local function verifyAlphaNumeric(str, errorMSG)
     if not (type(user) == "string") or not (user:gsub("[^%w_]+", "") == user) then
@@ -82,7 +83,12 @@ local function filter(url, h)
             if not ok then
                 fail(element.submodule_git_url, downloads[url].savePath)
             else
-                next[#next + 1] = {gitURL:gsub("/[^/]*$", ""), gitURL:gsub("[^/]*/", ""), downloads[url].savePath .. "/" .. element.name}
+                local _, _, nUser, nRepo = gitURL:find("([^/]*)/(.*).git$")
+                if not (nUser or nRepo) then
+                    fail(element.submodule_git_url, downloads[url].savePath)
+                else
+                tArgs[#tArgs + 1] = {gitURL:gsub("/[^/]*$", ""), gitURL:gsub("[^/]*$", "")
+                tArgs[tLen + downloads[url].savePath .. "/" .. element.name}
             end
         end
     end
