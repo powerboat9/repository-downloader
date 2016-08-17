@@ -1,6 +1,10 @@
 local rawList = ...
 local list = {}
 
+if #rawList < 1 then
+    error("Invalid command syntax", 0)
+end
+
 for _, v in ipairs(rawList) do
     if type(v) ~= "string" then
         error("Package name is not a string", 0)
