@@ -10,6 +10,8 @@
 
 download {package}
 
+Append "!" to the start of a package name to disable the removal of .lua file extensions
+
 # Package Format
 
 (user)/(repo)[:(branch)][@(gitPath)][>(savePath)]
