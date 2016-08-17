@@ -14,4 +14,4 @@ download build {package}
 
 # Package Format
 
-(**user**)/(**repo**)[:(**branch**)][@(**gitPath**)][>(**savePath**)]
+**(user)**/**(repo)**[:**(branch)**][@**(gitPath)**][>**(savePath)**]
