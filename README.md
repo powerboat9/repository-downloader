@@ -1,5 +1,6 @@
 #Syntax
 
+|:----:|:----:|
 |{}|Repeat 1 or more times|
 |**bold**|User specified value|
 
