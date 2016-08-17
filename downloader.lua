@@ -8,8 +8,12 @@ end
 for _, v in ipairs(rawList) do
     if type(v) ~= "string" then
         error("Package name is not a string", 0)
-    elseif v:gsub("[^%w/:@>-_]", "") ~= v then
+    elseif v:gsub("^!?[%w/:@>-_]*", "") ~= "" then
         error("Invalid package name", 0)
+    end
+    local removeLua = true
+    if v:sub(1, 1) == "!" then
+        removeLua = false
     end
     local displayName = (#v > 20) ? (v:sub(1, 20) .. "...") : v
     local _, end, user, repo = v:find("([^/]*)/([^/]*)")
@@ -42,10 +46,10 @@ for _, v in ipairs(rawList) do
             end
         end
     end
-    list[#list + 1] = {user, repo, savePath, gitPath, branch}
+    list[#list + 1] = {user, repo, savePath, gitPath, branch, removeLua}
 end
 
-local function getBaseURL(user, repo, path, branch)
+local function getBaseURL(user, repo, path, branch, removeLua)
     --path = fs.combine(gitPath, path)
     if (path ~= "") and (path:sub(1, 1) ~= "/") then path = "/" .. path end
     return baseURL = ("https://api.github.com/repos/%s/%s/contents%s"):format(user, repo, path) .. (branch and ("?ref=" .. branch)) or ""
@@ -91,7 +95,9 @@ local function gitGet(user, repo, savePath, gitPath, branch)
     end
     
     local function save(url, h)
-        local file = fs.open(downloads[url].savePath, "w")
+        local fPath = downloads[url].savePath
+        fPath = not removeLua and fPath or fPath:gsub(".lua$", "")
+        local file = fs.open(fPath, "w")
         file.write(h.readAll())
         file.close()
         h.close()
