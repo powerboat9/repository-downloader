@@ -8,9 +8,7 @@
 
 #Command Arguments
 
-download install {package}
-
-download build {package}
+download {package}
 
 # Package Format
 
