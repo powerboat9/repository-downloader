@@ -1,13 +1,54 @@
-local list = ...
+local rawList = ...
+local list = {}
 
-local function getBaseURL(path)
+for _, v in ipairs(rawList) do
+    if type(v) ~= "string" then
+        error("Package name is not a string", 0)
+    elseif v:gsub("[^%w/:@>-_]", "") ~= v then
+        error("Invalid package name", 0)
+    end
+    local displayName = (#v > 20) ? (v:sub(1, 20) .. "...") : v
+    local _, end, user, repo = v:find("([^/]*)/([^/]*)")
+    if not ok then
+        error("Invalid package " .. displayName, 0)
+    end
+    local gitPath, branch, savePath
+    if #v > end then
+        v = v:sub(end + 1, -1)
+        local stage = 1
+        while true do
+            local char = v:sub(1, 1)
+            local crop
+            if stage <= 1 and char == "@" then
+                stage = 2
+                _, crop, gitPath = v:find("@([^:>]*)")
+            elseif stage <= 2 and char == ":" then
+                stage = 3
+                _, crop, branch = v:find(":([^>]*)")
+            elseif stage <= 3 and char == ">" then
+                stage = 4
+                _, crop, savePath = v:find(">(.*)")
+            else
+                error("Malformed package name " .. displayName, 0)
+            end
+            if stage == 4 or #v == crop then
+                break
+            else
+                v = v:sub(end + 1, -1)
+            end
+        end
+    end
+    list[#list + 1] = {user, repo, savePath, gitPath, branch}
+end
+
+local function getBaseURL(user, repo, path, branch)
     --path = fs.combine(gitPath, path)
     if (path ~= "") and (path:sub(1, 1) ~= "/") then path = "/" .. path end
     return baseURL = ("https://api.github.com/repos/%s/%s/contents%s"):format(user, repo, path) .. (branch and ("?ref=" .. branch)) or ""
 end
 
 local function getPathFromURL(url)
-    return url:sub(30):gsub("%?ref=.*$", ""):gsub("^[^/]*/[^/]*/contents/", "")
+    return url:sub(30):gsub("%?ref=.*$", ""):gsub("^[^/]*/[^/]*/contents/?", "")
 end
 
 local function getTime()
@@ -18,7 +59,13 @@ local function unserializeJSON(str)
     return textutils.unserialize(str:gsub("\"([^\"]*)\"%s*:%s*", "%1 = "):gsub("[", "{"):gsub("]", "}"):gsub("null", "nil"))
 end
 
-function gitGet(user, repo, savePath, gitPath, branch)
+local function verifyAlphaNumeric(v, err)
+    if (type(v) ~= "string") or (v == "") or (v:gsub("%w", "") ~= "") then
+        error(err, 0)
+    end
+end
+
+local function gitGet(user, repo, savePath, gitPath, branch)
     local function verifyAlphaNumeric(str, errorMSG)
         if not (type(user) == "string") or not (user:gsub("[^%w_]+", "") == user) then
             error(errorMSG, 0)
@@ -28,12 +75,10 @@ function gitGet(user, repo, savePath, gitPath, branch)
     verifyAlphaNumeric(user, "Invalid username")
     verifyAlphaNumeric(repo, "Invalid repository")
     
-    savePath = type(savePath) == "string" and savePath
-    savePath = savePath or "/.APIS/" .. repo
+    savePath = (type(savePath) == "string") ? savePath : ("/.APIS/" .. repo)
     
     gitPath = type(gitPath) == "string" and gitPath or ""
     branch = type(branch) == "string" and branch or nil
-    next = type(next) == "table" and next or {}
     
     local downloads = {}
     local function download(url, savePath, isAPICall)
@@ -86,7 +131,7 @@ function gitGet(user, repo, savePath, gitPath, branch)
                     if not (nUser or nRepo) then
                         fail(element.submodule_git_url, downloads[url].savePath)
                     else
-                        list[#list + 1] = {nUser, nRepodownloads[url].savePath .. "/" .. element.name, "/"}
+                        list[#list + 1] = {nUser, nRepo, nRepodownloads[url].savePath .. "/" .. element.name}
                     end
                 end
             end
@@ -94,7 +139,7 @@ function gitGet(user, repo, savePath, gitPath, branch)
         h.close()
     end
     
-    download(getBaseURL(gitPath), savePath, true)
+    download(getBaseURL(user, repo, gitPath, branch), savePath, true)
     while true do
         local e, url, h = os.pullEvent()
         if downloads[url] then
