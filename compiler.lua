@@ -17,14 +17,21 @@ local function addFolder(path, tree)
     else
       local h = fs.open(subPath, 'r')
       if h then
+        local alt
+        if v:sub(-4, -1) == ".lua" then
+            alt = v:sub(1, -5)
+        else
+            alt = v .. ".lua"
+        end
         tree[v] = h.readAll()
+        tree[alt] = tree[v]
         h.close()
       end
     end
   end
 end
 
-addFolder('', files)
+addFolder('build', files)
 
 if not files['startup'] then
   error('You must have a file called startup to be executed at runtime.')
@@ -291,7 +298,6 @@ else
 end
 ]]
 
-fs.delete('/build')
-local h = fs.open('/build', 'w')
+local h = fs.open("build", "w")
 h.write(file)
 h.close()
