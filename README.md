@@ -15,3 +15,7 @@ Append "!" to the start of a package name to disable the removal of .lua file ex
 # Package Format
 
 (user)/(repo)[:(branch)][@(gitPath)][>(savePath)]
+
+#Compiler
+
+This compiler is merely a slightly tweaked version of oeed's compiler (http://pastebin.com/dJd0B0V8)
