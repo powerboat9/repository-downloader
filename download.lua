@@ -52,7 +52,7 @@ end
 local function getBaseURL(user, repo, path, branch, removeLua)
     --path = fs.combine(gitPath, path)
     if (path ~= "") and (path:sub(1, 1) ~= "/") then path = "/" .. path end
-    return baseURL = ("https://api.github.com/repos/%s/%s/contents%s"):format(user, repo, path) .. (branch and ("?ref=" .. branch)) or ""
+    return ("https://api.github.com/repos/%s/%s/contents%s"):format(user, repo, path) .. (branch and ("?ref=" .. branch)) or ""
 end
 
 local function getPathFromURL(url)
@@ -83,7 +83,7 @@ local function gitGet(user, repo, savePath, gitPath, branch)
     verifyAlphaNumeric(user, "Invalid username")
     verifyAlphaNumeric(repo, "Invalid repository")
     
-    savePath = (type(savePath) == "string") ? savePath : ("/.APIS/" .. repo)
+    savePath = (type(savePath) == "string") and savePath or ("/.APIS/" .. repo)
     
     gitPath = type(gitPath) == "string" and gitPath or ""
     branch = type(branch) == "string" and branch or nil
