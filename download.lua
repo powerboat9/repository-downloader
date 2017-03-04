@@ -128,7 +128,7 @@ local function gitGet(user, repo, savePath, gitPath, branch)
             elseif element.type == "dir" then
                 download(element.url, downloads[url].savePath .. "/" .. element.name, true)
             elseif element.type == "symlink" then
-                local f = fs.open(downloads[url].savePath .. "/" . element.name .. ".clnk", "w")
+                local f = fs.open(downloads[url].savePath .. "/" .. element.name .. ".clnk", "w")
                 f.write(element.target:gsub("^/", ""))
                 f.close()
             elseif element.type == "submodule" then
