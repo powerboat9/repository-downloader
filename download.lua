@@ -1,4 +1,4 @@
-local rawList = ...
+local rawList = {...}
 local list = {}
 
 if #rawList < 1 then
@@ -17,7 +17,7 @@ for _, v in ipairs(rawList) do
     end
     local displayName = (#v > 20) and (v:sub(1, 20) .. "...") or v
     local _, endData, user, repo = v:find("([^/]*)/([^/]*)")
-    if not ok then
+    if not endData then
         error("Invalid package " .. displayName, 0)
     end
     local gitPath, branch, savePath
@@ -52,7 +52,7 @@ end
 local function getBaseURL(user, repo, path, branch, removeLua)
     --path = fs.combine(gitPath, path)
     if (path ~= "") and (path:sub(1, 1) ~= "/") then path = "/" .. path end
-    return ("https://api.github.com/repos/%s/%s/contents%s"):format(user, repo, path) .. (branch and ("?ref=" .. branch)) or ""
+    return ("https://api.github.com/repos/%s/%s/contents%s"):format(user, repo, path) .. (branch and ("?ref=" .. branch) or "")
 end
 
 local function getPathFromURL(url)
@@ -64,7 +64,9 @@ local function getTime()
 end
 
 local function unserializeJSON(str)
-    return textutils.unserialize(str:gsub("\"([^\"]*)\"%s*:%s*", "%1 = "):gsub("[", "{"):gsub("]", "}"):gsub("null", "nil"))
+    local s = str:gsub("\"([^\"]*)\"%s*:%s*", "%1 = "):gsub("[", "{"):gsub("]", "}"):gsub("null", "nil")
+    print(s)
+    return textutils.unserialize(s)
 end
 
 local function verifyAlphaNumeric(v, err)
@@ -121,7 +123,7 @@ local function gitGet(user, repo, savePath, gitPath, branch)
     end
     
     local function filter(url, h)
-        local data = unserislizeJSON(h.readAll())
+        local data = unserializeJSON(h.readAll())
         for _, element in ipairs(data) do
             if element.type == "file" then
                 download(element.download_url, downloads[url].savePath .. "/" .. element.name, false)
@@ -170,7 +172,7 @@ local function gitGet(user, repo, savePath, gitPath, branch)
 end
 
 while #list > 0 do
-    print("Downloading " .. list[1] .. "/" .. list[2])
+    print("Downloading " .. list[1][1] .. "/" .. list[1][2])
     gitGet(table.unpack(list[1]))
     table.remove(list, 1)
     print("Downloaded")
