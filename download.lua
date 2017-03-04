@@ -15,14 +15,14 @@ for _, v in ipairs(rawList) do
     if v:sub(1, 1) == "!" then
         removeLua = false
     end
-    local displayName = (#v > 20) ? (v:sub(1, 20) .. "...") : v
-    local _, end, user, repo = v:find("([^/]*)/([^/]*)")
+    local displayName = (#v > 20) and (v:sub(1, 20) .. "...") or v
+    local _, endData, user, repo = v:find("([^/]*)/([^/]*)")
     if not ok then
         error("Invalid package " .. displayName, 0)
     end
     local gitPath, branch, savePath
-    if #v > end then
-        v = v:sub(end + 1, -1)
+    if #v > endData then
+        v = v:sub(endData + 1, -1)
         local stage = 1
         while true do
             local char = v:sub(1, 1)
@@ -42,7 +42,7 @@ for _, v in ipairs(rawList) do
             if stage == 4 or #v == crop then
                 break
             else
-                v = v:sub(end + 1, -1)
+                v = v:sub(endData + 1, -1)
             end
         end
     end
