@@ -64,6 +64,9 @@ local function getTime()
 end
 
 local function unserializeJSON(str)
+    local f = fs.open("k", "w")
+    f.write(str)
+    f.close()
     local s = str:gsub("\"([^\"]*)\"%s*:%s*", "%1 = "):gsub("[", "{"):gsub("]", "}"):gsub("null", "nil")
     print(s)
     return textutils.unserialize(s)
