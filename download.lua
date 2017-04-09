@@ -101,7 +101,7 @@ local function gitGet(user, repo, savePath, gitPath, branch)
     
     local function save(url, h)
         local fPath = downloads[url].savePath
-        fPath = not removeLua and fPath or fPath:gsub(".lua$", "")
+        fPath = not removeLua and fPath or fPath:gsub("%.lua$", "")
         local file = fs.open(fPath, "w")
         file.write(h.readAll())
         file.close()
