@@ -91,6 +91,7 @@ local function gitGet(user, repo, savePath, gitPath, branch)
     
     local downloads = {}
     local function download(url, savePath, isAPICall)
+        print("Downloading ", url, " to ", savePath)
         downloads[url] = {isAPICall = isAPICall, savePath = savePath, gitURL = url}
         http.request(url)
     end
