@@ -64,11 +64,7 @@ local function getTime()
 end
 
 local function unserializeJSON(str)
-    local f = fs.open("k", "w")
-    f.write(str)
-    f.close()
     local s = str:gsub("\"([^\"]*)\"%s*:%s*", "%1 = "):gsub("%[", "{"):gsub("]", "}"):gsub("null", "nil")
-    print(s)
     return textutils.unserialize(s)
 end
 
@@ -102,6 +98,7 @@ local function gitGet(user, repo, savePath, gitPath, branch)
     local function save(url, h)
         local fPath = downloads[url].savePath
         fPath = not removeLua and fPath or fPath:gsub("%.lua$", "")
+        print("Saving ", fPath)
         local file = fs.open(fPath, "w")
         file.write(h.readAll())
         file.close()
