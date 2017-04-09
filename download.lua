@@ -49,6 +49,10 @@ for _, v in ipairs(rawList) do
     list[#list + 1] = {user, repo, savePath, gitPath, branch, removeLua}
 end
 
+for _, v in ipairs(list) do
+    print(table.concat(list))
+end
+
 local function getBaseURL(user, repo, path, branch, removeLua)
     --path = fs.combine(gitPath, path)
     if (path ~= "") and (path:sub(1, 1) ~= "/") then path = "/" .. path end
