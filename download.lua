@@ -53,7 +53,7 @@ print(type(list))
 print(type(list[1]))
 
 for _, v in ipairs(list) do
-    print(table.concat(" ", list))
+    print(table.concat(v, " "))
 end
 
 local function getBaseURL(user, repo, path, branch, removeLua)
