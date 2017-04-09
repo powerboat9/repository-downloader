@@ -50,7 +50,7 @@ for _, v in ipairs(rawList) do
 end
 
 for _, v in ipairs(list) do
-    print(table.concat(list))
+    print(table.concat(list, " "))
 end
 
 local function getBaseURL(user, repo, path, branch, removeLua)
