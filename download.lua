@@ -49,6 +49,9 @@ for _, v in ipairs(rawList) do
     list[#list + 1] = {user, repo, savePath, gitPath, branch, removeLua}
 end
 
+print(type(list))
+print(type(list[1]))
+
 for _, v in ipairs(list) do
     print(table.concat(" ", list))
 end
