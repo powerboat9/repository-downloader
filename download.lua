@@ -160,6 +160,7 @@ local function gitGet(user, repo, savePath, gitPath, branch)
     while true do
         local e, url, h = os.pullEvent()
         if downloads[url] then
+            print("Got ", url)
             if e == "http_success" then
                 if downloads[url].isAPICall then
                     filter(url, h)
